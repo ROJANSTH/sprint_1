@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sprint_1/views/login_view.dart';
+import 'package:sprint_1/view/login_view.dart';
 
 class DashboardView extends StatelessWidget {
   const DashboardView({super.key});
