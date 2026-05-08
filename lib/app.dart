@@ -10,7 +10,7 @@ class App extends StatelessWidget {
       title: 'Sprint1 Sample',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(colorSchemeSeed: Colors.indigo, useMaterial3: true),
-      home: const SplashView(),
+      home: SplashView(),
     );
   }
 }
