@@ -13,8 +13,10 @@ class _SplashViewState extends State<SplashView> {
   @override
   void initState() {
     super.initState();
-    Timer(const Duration(seconds: 2), () {
+
+    Timer(const Duration(seconds: 3), () {
       if (!mounted) return;
+
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const OnboardingView()),
@@ -25,20 +27,55 @@ class _SplashViewState extends State<SplashView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.primary,
-      body: const Center(
+      backgroundColor: const Color(0xFF6C4DF6),
+
+      body: Center(
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.flutter_dash, size: 96, color: Colors.white),
-            SizedBox(height: 16),
-            Text(
-              'Sprint 1 Sample',
+            /// LOGO CONTAINER
+            Container(
+              height: 120,
+              width: 120,
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.15),
+                shape: BoxShape.circle,
+              ),
+
+              child: const Icon(
+                Icons.apartment_rounded,
+                size: 65,
+                color: Colors.white,
+              ),
+            ),
+
+            const SizedBox(height: 30),
+
+            /// APP NAME
+            const Text(
+              'Hostel Booking',
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 24,
+                fontSize: 30,
                 fontWeight: FontWeight.bold,
+                letterSpacing: 1,
               ),
+            ),
+
+            const SizedBox(height: 10),
+
+            /// SUBTITLE
+            const Text(
+              'Find and book your perfect hostel',
+              style: TextStyle(color: Colors.white70, fontSize: 15),
+            ),
+
+            const SizedBox(height: 50),
+
+            /// LOADING INDICATOR
+            const CircularProgressIndicator(
+              color: Colors.white,
+              strokeWidth: 3,
             ),
           ],
         ),
