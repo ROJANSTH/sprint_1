@@ -28,22 +28,27 @@ class _OnboardingViewState extends State<OnboardingView> {
 
   static const List<_OnboardingPage> _pages = [
     _OnboardingPage(
-      icon: Icons.explore,
-      title: 'Discover',
-      description: 'Find new things and explore everything we offer.',
+      icon: Icons.apartment_rounded,
+      title: 'Find Your Hostel',
+      description:
+          'Search and explore comfortable hostels near your preferred location easily.',
+      color: Colors.deepPurple,
+    ),
+
+    _OnboardingPage(
+      icon: Icons.bed_rounded,
+      title: 'Book Rooms Easily',
+      description:
+          'Check room details, prices, and availability with a simple booking process.',
       color: Colors.indigo,
     ),
+
     _OnboardingPage(
-      icon: Icons.bolt,
-      title: 'Fast & Easy',
-      description: 'A smooth experience built for speed and simplicity.',
-      color: Colors.deepOrange,
-    ),
-    _OnboardingPage(
-      icon: Icons.lock,
-      title: 'Secure',
-      description: 'Your data stays private and protected at every step.',
-      color: Colors.teal,
+      icon: Icons.security_rounded,
+      title: 'Safe & Secure',
+      description:
+          'Your personal information and bookings are protected and secure.',
+      color: Colors.purple,
     ),
   ];
 
@@ -62,15 +67,14 @@ class _OnboardingViewState extends State<OnboardingView> {
 
   Widget _dot(int i) {
     final selected = i == _index;
+
     return AnimatedContainer(
       duration: const Duration(milliseconds: 250),
       margin: const EdgeInsets.symmetric(horizontal: 4),
       width: selected ? 24 : 8,
       height: 8,
       decoration: BoxDecoration(
-        color: selected
-            ? Theme.of(context).colorScheme.primary
-            : Colors.grey.shade400,
+        color: selected ? Colors.deepPurple : Colors.grey.shade400,
         borderRadius: BorderRadius.circular(4),
       ),
     );
@@ -90,17 +94,32 @@ class _OnboardingViewState extends State<OnboardingView> {
   @override
   Widget build(BuildContext context) {
     final isLast = _index == _pages.length - 1;
+
     return Scaffold(
+      backgroundColor: Colors.white,
+
       body: SafeArea(
         child: Column(
           children: [
+            /// SKIP BUTTON
             Align(
               alignment: Alignment.centerRight,
-              child: TextButton(
-                onPressed: _goToLogin,
-                child: const Text('Skip'),
+              child: Padding(
+                padding: const EdgeInsets.only(right: 12, top: 8),
+                child: TextButton(
+                  onPressed: _goToLogin,
+                  child: const Text(
+                    'Skip',
+                    style: TextStyle(
+                      color: Colors.deepPurple,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
               ),
             ),
+
+            /// PAGES
             Expanded(
               child: PageView.builder(
                 controller: _controller,
@@ -108,26 +127,44 @@ class _OnboardingViewState extends State<OnboardingView> {
                 onPageChanged: (i) => setState(() => _index = i),
                 itemBuilder: (_, i) {
                   final page = _pages[i];
+
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 32),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(page.icon, size: 140, color: page.color),
-                        const SizedBox(height: 32),
+                        /// ICON
+                        Container(
+                          height: 180,
+                          width: 180,
+                          decoration: BoxDecoration(
+                            color: page.color.withOpacity(0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(page.icon, size: 90, color: page.color),
+                        ),
+
+                        const SizedBox(height: 40),
+
+                        /// TITLE
                         Text(
                           page.title,
+                          textAlign: TextAlign.center,
                           style: const TextStyle(
-                            fontSize: 28,
+                            fontSize: 30,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        const SizedBox(height: 16),
+
+                        const SizedBox(height: 18),
+
+                        /// DESCRIPTION
                         Text(
                           page.description,
                           textAlign: TextAlign.center,
                           style: const TextStyle(
                             fontSize: 16,
+                            height: 1.5,
                             color: Colors.black54,
                           ),
                         ),
@@ -137,17 +174,35 @@ class _OnboardingViewState extends State<OnboardingView> {
                 },
               ),
             ),
+
+            /// DOTS
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [_dot(0), _dot(1), _dot(2)],
             ),
+
+            /// BUTTON
             Padding(
               padding: const EdgeInsets.all(24),
               child: SizedBox(
                 width: double.infinity,
-                child: FilledButton(
+                height: 55,
+                child: ElevatedButton(
                   onPressed: _next,
-                  child: Text(isLast ? 'Get Started' : 'Next'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.deepPurple,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                  child: Text(
+                    isLast ? 'Get Started' : 'Next',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ),
               ),
             ),
