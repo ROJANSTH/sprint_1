@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sprint_1/theme/my_theme.dart';
 import 'package:sprint_1/view/splash_view.dart';
 
 class App extends StatelessWidget {
@@ -9,8 +10,8 @@ class App extends StatelessWidget {
     return MaterialApp(
       title: 'Sprint1 Sample',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(colorSchemeSeed: Colors.indigo, useMaterial3: true),
-      home: SplashView(),
+      theme: MyTheme.light,
+      home: const SplashView(),
     );
   }
 }

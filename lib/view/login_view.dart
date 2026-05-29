@@ -1,99 +1,100 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sprint_1/theme/my_theme.dart';
 import 'package:sprint_1/view/dashboard_view.dart';
 import 'package:sprint_1/view/signup_view.dart';
 
-class LoginView extends StatefulWidget {
+// ─────────────────────────────────────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────────────────────────────────────
+
+class LoginState {
+  const LoginState({this.obscurePassword = true, this.isLoading = false});
+
+  final bool obscurePassword;
+  final bool isLoading;
+
+  LoginState copyWith({bool? obscurePassword, bool? isLoading}) => LoginState(
+    obscurePassword: obscurePassword ?? this.obscurePassword,
+    isLoading: isLoading ?? this.isLoading,
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// NOTIFIER
+// ─────────────────────────────────────────────────────────────────────────────
+
+class LoginNotifier extends Notifier<LoginState> {
+  @override
+  LoginState build() => const LoginState();
+
+  void togglePassword() =>
+      state = state.copyWith(obscurePassword: !state.obscurePassword);
+
+  void setLoading(bool value) => state = state.copyWith(isLoading: value);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PROVIDER
+// ─────────────────────────────────────────────────────────────────────────────
+
+final loginProvider = NotifierProvider<LoginNotifier, LoginState>(
+  LoginNotifier.new,
+);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// VIEW
+// ─────────────────────────────────────────────────────────────────────────────
+
+class LoginView extends ConsumerWidget {
   const LoginView({super.key});
 
   @override
-  State<LoginView> createState() => _LoginViewState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(loginProvider);
+    final notifier = ref.read(loginProvider.notifier);
+    final formKey = GlobalKey<FormState>();
+    final emailCtrl = TextEditingController();
+    final passwordCtrl = TextEditingController();
 
-class _LoginViewState extends State<LoginView> {
-  final _formKey = GlobalKey<FormState>();
-
-  final _emailCtrl = TextEditingController();
-  final _passwordCtrl = TextEditingController();
-
-  bool _obscurePassword = true;
-
-  @override
-  void dispose() {
-    _emailCtrl.dispose();
-    _passwordCtrl.dispose();
-    super.dispose();
-  }
-
-  void _login() {
-    if (_formKey.currentState?.validate() ?? false) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const DashboardView()),
-      );
+    void login() {
+      if (formKey.currentState?.validate() ?? false) {
+        notifier.setLoading(true);
+        // TODO: replace with real auth call
+        Future.delayed(const Duration(milliseconds: 800), () {
+          notifier.setLoading(false);
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const DashboardView()),
+          );
+        });
+      }
     }
-  }
 
-  void _goToSignup() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => const SignupView()),
-    );
-  }
-
-  InputDecoration customInputDecoration({required String hintText}) {
-    return InputDecoration(
-      hintText: hintText,
-      hintStyle: const TextStyle(color: Colors.grey, fontSize: 14),
-      filled: true,
-      fillColor: const Color(0xFFF5F5F5),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: Colors.grey.shade300),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: Colors.grey.shade300),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Colors.deepPurple, width: 1.5),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-
+      backgroundColor: AppColors.white,
       body: SafeArea(
         child: SingleChildScrollView(
           child: Form(
-            key: _formKey,
+            key: formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                /// TOP SECTION
+                // ── Header ────────────────────────────────────────────────
                 const SizedBox(height: 30),
-
                 Center(
                   child: Column(
-                    children: const [
+                    children: [
                       Text(
                         'HostelFinder',
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.deepPurple,
+                        style: AppTextStyles.h2.copyWith(
+                          color: AppColors.primary,
                         ),
                       ),
-
-                      SizedBox(height: 6),
-
+                      const SizedBox(height: 6),
                       Text(
                         'Find cozy stays, meet travelers',
-                        style: TextStyle(color: Colors.grey, fontSize: 14),
+                        style: AppTextStyles.bodySmall,
                       ),
                     ],
                   ),
@@ -101,231 +102,165 @@ class _LoginViewState extends State<LoginView> {
 
                 const SizedBox(height: 24),
 
-                /// IMAGE
+                // ── Hero image ────────────────────────────────────────────
                 SizedBox(
                   width: double.infinity,
                   height: 240,
                   child: Image.asset(
-                    'assets/images/hostels.png',
+                    'assets/image/hostels.png',
                     fit: BoxFit.cover,
                   ),
                 ),
 
                 const SizedBox(height: 28),
 
-                /// FORM SECTION
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      /// EMAIL
-                      const Text(
-                        'Email',
-                        style: TextStyle(
-                          color: Colors.grey,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-
+                      // ── Email ──────────────────────────────────────────
+                      Text('Email', style: AppTextStyles.labelMedium),
                       const SizedBox(height: 8),
-
                       TextFormField(
-                        controller: _emailCtrl,
-                        decoration: customInputDecoration(
+                        controller: emailCtrl,
+                        keyboardType: TextInputType.emailAddress,
+                        style: AppTextStyles.bodyMedium,
+                        decoration: const InputDecoration(
                           hintText: 'Enter your email',
+                          prefixIcon: Icon(Icons.email_outlined),
                         ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter email';
-                          }
-                          return null;
-                        },
+                        validator: (v) => (v == null || v.isEmpty)
+                            ? 'Please enter email'
+                            : null,
                       ),
 
                       const SizedBox(height: 20),
 
-                      /// PASSWORD LABEL
+                      // ── Password ───────────────────────────────────────
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: const [
-                          Text(
-                            'Password',
-                            style: TextStyle(
-                              color: Colors.grey,
-                              fontWeight: FontWeight.w500,
+                        children: [
+                          Text('Password', style: AppTextStyles.labelMedium),
+                          TextButton(
+                            onPressed: () {}, // TODO: forgot password
+                            style: TextButton.styleFrom(
+                              padding: EdgeInsets.zero,
+                              minimumSize: Size.zero,
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                             ),
-                          ),
-
-                          Text(
-                            'Forgot Password?',
-                            style: TextStyle(
-                              color: Colors.deepPurple,
-                              fontWeight: FontWeight.w500,
-                              fontSize: 13,
+                            child: Text(
+                              'Forgot Password?',
+                              style: AppTextStyles.labelMedium.copyWith(
+                                color: AppColors.primary,
+                              ),
                             ),
                           ),
                         ],
                       ),
-
                       const SizedBox(height: 8),
-
-                      /// PASSWORD FIELD
                       TextFormField(
-                        controller: _passwordCtrl,
-                        obscureText: _obscurePassword,
-                        decoration:
-                            customInputDecoration(
-                              hintText: 'Enter your password',
-                            ).copyWith(
-                              suffixIcon: IconButton(
-                                icon: Icon(
-                                  _obscurePassword
-                                      ? Icons.visibility_off_outlined
-                                      : Icons.visibility_outlined,
-                                ),
-                                onPressed: () {
-                                  setState(() {
-                                    _obscurePassword = !_obscurePassword;
-                                  });
-                                },
-                              ),
+                        controller: passwordCtrl,
+                        obscureText: state.obscurePassword,
+                        style: AppTextStyles.bodyMedium,
+                        decoration: InputDecoration(
+                          hintText: 'Enter your password',
+                          prefixIcon: const Icon(Icons.lock_outline),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              state.obscurePassword
+                                  ? Icons.visibility_off_outlined
+                                  : Icons.visibility_outlined,
+                              color: AppColors.textSecondary,
                             ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter password';
-                          }
-                          return null;
-                        },
+                            onPressed: notifier.togglePassword,
+                          ),
+                        ),
+                        validator: (v) => (v == null || v.isEmpty)
+                            ? 'Please enter password'
+                            : null,
                       ),
 
                       const SizedBox(height: 24),
 
-                      /// LOGIN BUTTON
+                      // ── Login button ───────────────────────────────────
                       SizedBox(
                         width: double.infinity,
-                        height: 55,
+                        height: 52,
                         child: ElevatedButton(
-                          onPressed: _login,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.deepPurple,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                          ),
-                          child: const Text(
-                            'Log In',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.white,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
+                          onPressed: state.isLoading ? null : login,
+                          child: state.isLoading
+                              ? const SizedBox(
+                                  width: 22,
+                                  height: 22,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2.5,
+                                    color: AppColors.white,
+                                  ),
+                                )
+                              : const Text('Log In'),
                         ),
                       ),
 
                       const SizedBox(height: 20),
 
-                      /// DIVIDER
+                      // ── Divider ────────────────────────────────────────
                       Row(
                         children: [
-                          Expanded(child: Divider(color: Colors.grey.shade300)),
-
-                          const Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 10),
+                          const Expanded(child: Divider()),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 10),
                             child: Text(
                               'or continue with',
-                              style: TextStyle(color: Colors.grey),
+                              style: AppTextStyles.bodySmall,
                             ),
                           ),
-
-                          Expanded(child: Divider(color: Colors.grey.shade300)),
+                          const Expanded(child: Divider()),
                         ],
                       ),
 
                       const SizedBox(height: 20),
 
-                      /// SOCIAL BUTTONS
+                      // ── Social buttons ─────────────────────────────────
                       Row(
                         children: [
-                          /// GOOGLE
-                          Expanded(
-                            child: Container(
-                              height: 52,
-                              decoration: BoxDecoration(
-                                border: Border.all(color: Colors.grey.shade300),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: const [
-                                  Icon(
-                                    Icons.g_mobiledata,
-                                    color: Colors.red,
-                                    size: 30,
-                                  ),
-
-                                  SizedBox(width: 6),
-
-                                  Text(
-                                    'Google',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
+                          _SocialButton(
+                            icon: Icons.g_mobiledata,
+                            iconColor: Colors.red,
+                            label: 'Google',
+                            onTap: () {},
                           ),
-
                           const SizedBox(width: 14),
-
-                          /// FACEBOOK
-                          Expanded(
-                            child: Container(
-                              height: 52,
-                              decoration: BoxDecoration(
-                                border: Border.all(color: Colors.grey.shade300),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: const [
-                                  Icon(Icons.facebook, color: Colors.indigo),
-
-                                  SizedBox(width: 6),
-
-                                  Text(
-                                    'Facebook',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
+                          _SocialButton(
+                            icon: Icons.facebook,
+                            iconColor: Colors.indigo,
+                            label: 'Facebook',
+                            onTap: () {},
                           ),
                         ],
                       ),
 
                       const SizedBox(height: 24),
 
-                      /// SIGNUP TEXT
+                      // ── Sign up link ───────────────────────────────────
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Text(
+                          Text(
                             "Don't have an account? ",
-                            style: TextStyle(color: Colors.grey),
+                            style: AppTextStyles.bodySmall,
                           ),
-
                           GestureDetector(
-                            onTap: _goToSignup,
-                            child: const Text(
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const SignupView(),
+                              ),
+                            ),
+                            child: Text(
                               'Sign up',
-                              style: TextStyle(
-                                color: Colors.deepPurple,
-                                fontWeight: FontWeight.bold,
+                              style: AppTextStyles.labelLarge.copyWith(
+                                color: AppColors.primary,
                               ),
                             ),
                           ),
@@ -338,6 +273,50 @@ class _LoginViewState extends State<LoginView> {
                 ),
               ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SOCIAL BUTTON WIDGET
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _SocialButton extends StatelessWidget {
+  const _SocialButton({
+    required this.icon,
+    required this.iconColor,
+    required this.label,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final Color iconColor;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          height: 52,
+          decoration: BoxDecoration(
+            border: Border.all(color: AppColors.divider),
+            borderRadius: BorderRadius.circular(12),
+            color: AppColors.white,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, color: iconColor, size: 26),
+              const SizedBox(width: 6),
+              Text(label, style: AppTextStyles.labelLarge),
+            ],
           ),
         ),
       ),

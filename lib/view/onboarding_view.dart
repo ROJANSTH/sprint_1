@@ -1,56 +1,80 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sprint_1/theme/my_theme.dart';
 import 'package:sprint_1/view/login_view.dart';
 
-class OnboardingView extends StatefulWidget {
-  const OnboardingView({super.key});
+// ─────────────────────────────────────────────────────────────────────────────
+// MODEL
+// ─────────────────────────────────────────────────────────────────────────────
 
-  @override
-  State<OnboardingView> createState() => _OnboardingViewState();
-}
-
-class _OnboardingPage {
-  final IconData icon;
-  final String title;
-  final String description;
-  final Color color;
-
-  const _OnboardingPage({
+class OnboardingPage {
+  const OnboardingPage({
     required this.icon,
     required this.title,
     required this.description,
     required this.color,
   });
+
+  final IconData icon;
+  final String title;
+  final String description;
+  final Color color;
 }
 
-class _OnboardingViewState extends State<OnboardingView> {
-  final PageController _controller = PageController();
-  int _index = 0;
+const _pages = [
+  OnboardingPage(
+    icon: Icons.apartment_rounded,
+    title: 'Find Your Hostel',
+    description:
+        'Search and explore comfortable hostels near your preferred location easily.',
+    color: AppColors.primary,
+  ),
+  OnboardingPage(
+    icon: Icons.bed_rounded,
+    title: 'Book Rooms Easily',
+    description:
+        'Check room details, prices, and availability with a simple booking process.',
+    color: Color(0xFF3B5BFF),
+  ),
+  OnboardingPage(
+    icon: Icons.security_rounded,
+    title: 'Safe & Secure',
+    description:
+        'Your personal information and bookings are protected and secure.',
+    color: Color(0xFF9B3BFF),
+  ),
+];
 
-  static const List<_OnboardingPage> _pages = [
-    _OnboardingPage(
-      icon: Icons.apartment_rounded,
-      title: 'Find Your Hostel',
-      description:
-          'Search and explore comfortable hostels near your preferred location easily.',
-      color: Colors.deepPurple,
-    ),
+// ─────────────────────────────────────────────────────────────────────────────
+// STATE + NOTIFIER
+// ─────────────────────────────────────────────────────────────────────────────
 
-    _OnboardingPage(
-      icon: Icons.bed_rounded,
-      title: 'Book Rooms Easily',
-      description:
-          'Check room details, prices, and availability with a simple booking process.',
-      color: Colors.indigo,
-    ),
+class OnboardingNotifier extends Notifier<int> {
+  @override
+  int build() => 0;
 
-    _OnboardingPage(
-      icon: Icons.security_rounded,
-      title: 'Safe & Secure',
-      description:
-          'Your personal information and bookings are protected and secure.',
-      color: Colors.purple,
-    ),
-  ];
+  void setPage(int index) => state = index;
+
+  bool get isLast => state == _pages.length - 1;
+}
+
+final onboardingProvider = NotifierProvider<OnboardingNotifier, int>(
+  OnboardingNotifier.new,
+);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// VIEW
+// ─────────────────────────────────────────────────────────────────────────────
+
+class OnboardingView extends ConsumerStatefulWidget {
+  const OnboardingView({super.key});
+
+  @override
+  ConsumerState<OnboardingView> createState() => _OnboardingViewState();
+}
+
+class _OnboardingViewState extends ConsumerState<OnboardingView> {
+  final _controller = PageController();
 
   @override
   void dispose() {
@@ -65,23 +89,9 @@ class _OnboardingViewState extends State<OnboardingView> {
     );
   }
 
-  Widget _dot(int i) {
-    final selected = i == _index;
-
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 250),
-      margin: const EdgeInsets.symmetric(horizontal: 4),
-      width: selected ? 24 : 8,
-      height: 8,
-      decoration: BoxDecoration(
-        color: selected ? Colors.deepPurple : Colors.grey.shade400,
-        borderRadius: BorderRadius.circular(4),
-      ),
-    );
-  }
-
   void _next() {
-    if (_index == _pages.length - 1) {
+    final notifier = ref.read(onboardingProvider.notifier);
+    if (notifier.isLast) {
       _goToLogin();
     } else {
       _controller.nextPage(
@@ -93,47 +103,45 @@ class _OnboardingViewState extends State<OnboardingView> {
 
   @override
   Widget build(BuildContext context) {
-    final isLast = _index == _pages.length - 1;
+    final currentIndex = ref.watch(onboardingProvider);
+    final isLast = currentIndex == _pages.length - 1;
 
     return Scaffold(
-      backgroundColor: Colors.white,
-
+      backgroundColor: AppColors.white,
       body: SafeArea(
         child: Column(
           children: [
-            /// SKIP BUTTON
+            // ── Skip ────────────────────────────────────────────────────────
             Align(
               alignment: Alignment.centerRight,
               child: Padding(
                 padding: const EdgeInsets.only(right: 12, top: 8),
                 child: TextButton(
                   onPressed: _goToLogin,
-                  child: const Text(
+                  child: Text(
                     'Skip',
-                    style: TextStyle(
-                      color: Colors.deepPurple,
-                      fontWeight: FontWeight.w600,
+                    style: AppTextStyles.labelLarge.copyWith(
+                      color: AppColors.primary,
                     ),
                   ),
                 ),
               ),
             ),
 
-            /// PAGES
+            // ── Pages ────────────────────────────────────────────────────────
             Expanded(
               child: PageView.builder(
                 controller: _controller,
                 itemCount: _pages.length,
-                onPageChanged: (i) => setState(() => _index = i),
+                onPageChanged: (i) =>
+                    ref.read(onboardingProvider.notifier).setPage(i),
                 itemBuilder: (_, i) {
                   final page = _pages[i];
-
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 32),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        /// ICON
                         Container(
                           height: 180,
                           width: 180,
@@ -143,29 +151,18 @@ class _OnboardingViewState extends State<OnboardingView> {
                           ),
                           child: Icon(page.icon, size: 90, color: page.color),
                         ),
-
                         const SizedBox(height: 40),
-
-                        /// TITLE
                         Text(
                           page.title,
                           textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            fontSize: 30,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: AppTextStyles.h1,
                         ),
-
                         const SizedBox(height: 18),
-
-                        /// DESCRIPTION
                         Text(
                           page.description,
                           textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            height: 1.5,
-                            color: Colors.black54,
+                          style: AppTextStyles.bodyLarge.copyWith(
+                            color: AppColors.textSecondary,
                           ),
                         ),
                       ],
@@ -175,39 +172,52 @@ class _OnboardingViewState extends State<OnboardingView> {
               ),
             ),
 
-            /// DOTS
+            // ── Dots ─────────────────────────────────────────────────────────
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: [_dot(0), _dot(1), _dot(2)],
+              children: List.generate(
+                _pages.length,
+                (i) => _Dot(active: i == currentIndex),
+              ),
             ),
 
-            /// BUTTON
+            // ── Button ───────────────────────────────────────────────────────
             Padding(
               padding: const EdgeInsets.all(24),
               child: SizedBox(
                 width: double.infinity,
-                height: 55,
+                height: 52,
                 child: ElevatedButton(
                   onPressed: _next,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.deepPurple,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                  ),
-                  child: Text(
-                    isLast ? 'Get Started' : 'Next',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                  child: Text(isLast ? 'Get Started' : 'Next'),
                 ),
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DOT INDICATOR
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _Dot extends StatelessWidget {
+  const _Dot({required this.active});
+  final bool active;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 250),
+      margin: const EdgeInsets.symmetric(horizontal: 4),
+      width: active ? 24 : 8,
+      height: 8,
+      decoration: BoxDecoration(
+        color: active ? AppColors.primary : AppColors.textHint,
+        borderRadius: BorderRadius.circular(4),
       ),
     );
   }

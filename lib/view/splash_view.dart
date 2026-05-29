@@ -1,80 +1,82 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sprint_1/theme/my_theme.dart';
 import 'package:sprint_1/view/onboarding_view.dart';
 
-class SplashView extends StatefulWidget {
+// ─────────────────────────────────────────────────────────────────────────────
+// PROVIDER
+// ─────────────────────────────────────────────────────────────────────────────
+
+final splashProvider = FutureProvider<void>((ref) async {
+  await Future.delayed(const Duration(seconds: 3));
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// VIEW
+// ─────────────────────────────────────────────────────────────────────────────
+
+class SplashView extends ConsumerWidget {
   const SplashView({super.key});
 
   @override
-  State<SplashView> createState() => _SplashViewState();
-}
-
-class _SplashViewState extends State<SplashView> {
-  @override
-  void initState() {
-    super.initState();
-
-    Timer(const Duration(seconds: 3), () {
-      if (!mounted) return;
-
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const OnboardingView()),
-      );
+  Widget build(BuildContext context, WidgetRef ref) {
+    ref.listen<AsyncValue<void>>(splashProvider, (_, next) {
+      if (next is AsyncData) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const OnboardingView()),
+        );
+      }
     });
-  }
 
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF6C4DF6),
-
+      backgroundColor: AppColors.primary,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            /// LOGO CONTAINER
+            // ── Logo ────────────────────────────────────────────────────────
             Container(
               height: 120,
               width: 120,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.15),
+                color: AppColors.white.withOpacity(0.15),
                 shape: BoxShape.circle,
               ),
-
               child: const Icon(
                 Icons.apartment_rounded,
                 size: 65,
-                color: Colors.white,
+                color: AppColors.white,
               ),
             ),
 
             const SizedBox(height: 30),
 
-            /// APP NAME
-            const Text(
+            // ── App name ─────────────────────────────────────────────────────
+            Text(
               'Hostel Booking',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 30,
-                fontWeight: FontWeight.bold,
+              style: AppTextStyles.h1.copyWith(
+                color: AppColors.white,
                 letterSpacing: 1,
               ),
             ),
 
             const SizedBox(height: 10),
 
-            /// SUBTITLE
-            const Text(
+            // ── Subtitle ─────────────────────────────────────────────────────
+            Text(
               'Find and book your perfect hostel',
-              style: TextStyle(color: Colors.white70, fontSize: 15),
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: AppColors.white.withOpacity(0.75),
+              ),
             ),
 
             const SizedBox(height: 50),
 
-            /// LOADING INDICATOR
+            // ── Loader ───────────────────────────────────────────────────────
             const CircularProgressIndicator(
-              color: Colors.white,
+              color: AppColors.white,
               strokeWidth: 3,
             ),
           ],
